@@ -66,9 +66,6 @@ jobs:
         echo "$KUBECONFIG_FILE" | tr -d '\n' | base64 -d > kubeconfig
         export KUBECONFIG=$PWD/kubeconfig
         kubectl config get-contexts
-
-    - name: Deploy to k3s
-      run: |
         kubectl apply -f namespace.yml
         kubectl apply -f backend-deployment.yaml
         kubectl apply -f frontend-deployment.yaml
