@@ -56,6 +56,11 @@ jobs:
         docker build -t $DOCKER_USER/frontend:latest ./frontend
         docker push $DOCKER_USER/frontend:latest
 
+    - name: Debug base64 content
+      run: |
+        echo "Base64 Length: ${#KUBECONFIG_BASE64}"
+        echo "$KUBECONFIG_BASE64" | head -c 100
+
     - name: Configure Kubeconfig
       run: |
         echo "$KUBECONFIG_BASE64" | base64 -d > kubeconfig
