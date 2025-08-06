@@ -2,19 +2,19 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:  main 
+    branches: [ main ]
   pull_request:
-    branches:  main 
+    branches: [ main ]
 
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
     env:
-      DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
-      KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_BASE64 }}
-    steps:
+      DOCKER_USER: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKER_PASS: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_FILE }}
 
+    steps:
     - name: Checkout Code
       uses: actions/checkout@v3
 
@@ -33,11 +33,11 @@ jobs:
 
     - name: Run Backend Lint
       working-directory: ./backend
-      run: npm run lint || echo "Lint issues found in backend"
+      run: npm run lint || echo "Lint issues in backend"
 
     - name: Run Frontend Lint
       working-directory: ./frontend
-      run: npm run lint || echo "Lint issues found in frontend"
+      run: npm run lint || echo "Lint issues in frontend"
 
     - name: Run Backend Tests
       working-directory: ./backend
@@ -46,23 +46,23 @@ jobs:
     - name: Log in to DockerHub
       run: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-    - name: Build and Push Backend Docker Image
+    - name: Build and Push Backend Image
       run: |
         docker build -t $DOCKER_USER/backend:latest ./backend
         docker push $DOCKER_USER/backend:latest
 
-    - name: Build and Push Frontend Docker Image
+    - name: Build and Push Frontend Image
       run: |
         docker build -t $DOCKER_USER/frontend:latest ./frontend
         docker push $DOCKER_USER/frontend:latest
 
-    - name: Decode and Configure KUBECONFIG
+    - name: Configure Kubeconfig
       run: |
         echo "$KUBECONFIG_BASE64" | base64 -d > kubeconfig
         export KUBECONFIG=$PWD/kubeconfig
         kubectl config get-contexts
 
-    - name: Apply Kubernetes Manifests
+    - name: Deploy to k3s
       run: |
         kubectl apply -f namespace.yml
         kubectl apply -f backend-deployment.yaml
