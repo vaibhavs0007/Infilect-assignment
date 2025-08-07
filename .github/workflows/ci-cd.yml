@@ -53,7 +53,9 @@ jobs:
 
     - name: Build and Push Frontend Image
       run: |
-        docker build -t $DOCKER_USER/frontend:latest ./frontend
+        docker build \
+          --build-arg REACT_APP_BACKEND_URL=http://backend-service:5000 \
+          -t $DOCKER_USER/frontend:latest ./frontend
         docker push $DOCKER_USER/frontend:latest
 
     - name: Debug base64 content
