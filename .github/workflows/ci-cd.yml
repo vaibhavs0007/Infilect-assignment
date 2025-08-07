@@ -65,9 +65,10 @@ jobs:
 
     - name: Configure Kubeconfig
       run: |
-        echo "$KUBECONFIG_FILE" | tr -d '\n' | base64 -d > kubeconfig
+        echo "$KUBECONFIG_BASE64" | base64 -d > kubeconfig
         export KUBECONFIG=$PWD/kubeconfig
-        kubectl config get-contexts
+        kubectl get nodes
         kubectl apply -f namespace.yml
         kubectl apply -f backend-deployment.yaml
         kubectl apply -f frontend-deployment.yaml
+
